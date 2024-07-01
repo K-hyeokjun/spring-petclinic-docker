@@ -17,20 +17,27 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: "${GIT_BRANCH}", url: "${GIT_REPO_URL}"
+                script {
+                    echo 'Checking out code from Git...'
+                    git branch: "${GIT_BRANCH}", url: "${GIT_REPO_URL}"
+                }
             }
         }
 
         stage('Build') {
             steps {
-                sh './mvnw clean package'
+                script {
+                    echo 'Building the project...'
+                    sh './mvnw clean package'
+                }
             }
         }
 
         stage('Docker Build') {
             steps {
                 script {
-                    dockerImage = docker.build("${DOCKER_IMAGE}:${env.BUILD_ID}", "--cache-from=${DOCKER_IMAGE}:latest .")
+                    echo 'Building Docker image...'
+                    dockerImage = docker.build("${DOCKER_IMAGE}:${env.BUILD_ID}")
                 }
             }
         }
@@ -38,6 +45,7 @@ pipeline {
         stage('Docker Push') {
             steps {
                 script {
+                    echo 'Pushing Docker image to registry...'
                     docker.withRegistry('', "${DOCKER_CREDENTIALS_ID}") {
                         dockerImage.push()
                         dockerImage.push("latest")
@@ -49,6 +57,7 @@ pipeline {
         stage('Deploy MySQL') {
             steps {
                 script {
+                    echo 'Deploying MySQL...'
                     withCredentials([file(credentialsId: "${KUBECONFIG_CREDENTIAL_ID}", variable: 'KUBECONFIG')]) {
                         sh 'kubectl apply -f k8s/mysql-config-persistentvolumeclaim.yaml --kubeconfig=$KUBECONFIG'
                         sh 'kubectl apply -f k8s/mysql-data-persistentvolumeclaim.yaml --kubeconfig=$KUBECONFIG'
@@ -62,6 +71,7 @@ pipeline {
         stage('Update Kubernetes Manifests') {
             steps {
                 script {
+                    echo 'Updating Kubernetes manifests...'
                     // Update Kubernetes deployment YAML file with new Docker image tag
                     sh 'sed -i "34s|.*|          image: ${DOCKER_IMAGE}:${env.BUILD_ID}|" k8s/petclinic-deployment.yaml'
                     
@@ -78,6 +88,7 @@ pipeline {
         stage('Deploy PetClinic') {
             steps {
                 script {
+                    echo 'Deploying PetClinic application...'
                     withCredentials([file(credentialsId: "${KUBECONFIG_CREDENTIAL_ID}", variable: 'KUBECONFIG')]) {
                         sh 'kubectl apply -f k8s/petclinic-deployment.yaml --kubeconfig=$KUBECONFIG'
                         sh 'kubectl apply -f k8s/petclinic-service.yaml --kubeconfig=$KUBECONFIG'
@@ -89,6 +100,7 @@ pipeline {
         stage('Sync with Argo CD') {
             steps {
                 script {
+                    echo 'Syncing with Argo CD...'
                     withCredentials([file(credentialsId: "${KUBECONFIG_CREDENTIAL_ID}", variable: 'KUBECONFIG')]) {
                         // Sync the application using kubectl
                         sh 'kubectl apply -f k8s/petclinic-deployment.yaml --kubeconfig=$KUBECONFIG'
