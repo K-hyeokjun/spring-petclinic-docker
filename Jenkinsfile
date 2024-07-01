@@ -6,7 +6,7 @@ pipeline {
         DOCKER_CREDENTIALS_ID = 'dockerhub-credentials-id'
         GIT_REPO_URL = 'https://github.com/K-hyeokjun/spring-petclinic-docker'
         GIT_BRANCH = 'main'
-        KUBECONFIG_CREDENTIAL_ID = 'your-kubeconfig-credentials-id'  // 설정한 자격 증명 ID
+        KUBECONFIG_CREDENTIAL_ID = 'your-kubeconfig-credentials-id'
     }
 
     stages {
@@ -40,6 +40,19 @@ pipeline {
             }
         }
 
+        stage('Deploy MySQL') {
+            steps {
+                script {
+                    withCredentials([file(credentialsId: "${KUBECONFIG_CREDENTIAL_ID}", variable: 'KUBECONFIG')]) {
+                        sh 'kubectl apply -f k8s/mysql-config-persistentvolumeclaim.yaml --kubeconfig=$KUBECONFIG'
+                        sh 'kubectl apply -f k8s/mysql-data-persistentvolumeclaim.yaml --kubeconfig=$KUBECONFIG'
+                        sh 'kubectl apply -f k8s/mysql-deployment.yaml --kubeconfig=$KUBECONFIG'
+                        sh 'kubectl apply -f k8s/mysql-service.yaml --kubeconfig=$KUBECONFIG'
+                    }
+                }
+            }
+        }
+
         stage('Update Kubernetes Manifests') {
             steps {
                 script {
@@ -52,6 +65,17 @@ pipeline {
                     sh 'git add k8s/petclinic-deployment.yaml'
                     sh 'git commit -m "Update image to ${DOCKER_IMAGE}:${env.BUILD_ID}"'
                     sh 'git push'
+                }
+            }
+        }
+
+        stage('Deploy PetClinic') {
+            steps {
+                script {
+                    withCredentials([file(credentialsId: "${KUBECONFIG_CREDENTIAL_ID}", variable: 'KUBECONFIG')]) {
+                        sh 'kubectl apply -f k8s/petclinic-deployment.yaml --kubeconfig=$KUBECONFIG'
+                        sh 'kubectl apply -f k8s/petclinic-service.yaml --kubeconfig=$KUBECONFIG'
+                    }
                 }
             }
         }
