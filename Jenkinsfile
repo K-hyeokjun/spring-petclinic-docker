@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'docker:19.03.12'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
 
     environment {
         DOCKER_IMAGE = 'kwonhyeokjun/spring-petclinic'
@@ -25,7 +30,7 @@ pipeline {
         stage('Docker Build') {
             steps {
                 script {
-                    dockerImage = docker.build("${DOCKER_IMAGE}:${env.BUILD_ID}")
+                    dockerImage = docker.build("${DOCKER_IMAGE}:${env.BUILD_ID}", "--cache-from=${DOCKER_IMAGE}:latest .")
                 }
             }
         }
@@ -35,6 +40,7 @@ pipeline {
                 script {
                     docker.withRegistry('', "${DOCKER_CREDENTIALS_ID}") {
                         dockerImage.push()
+                        dockerImage.push("latest")
                     }
                 }
             }
