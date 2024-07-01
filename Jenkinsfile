@@ -6,7 +6,7 @@ pipeline {
         DOCKER_CREDENTIALS_ID = 'dockerhub-credentials-id'
         GIT_REPO_URL = 'https://github.com/K-hyeokjun/spring-petclinic-docker'
         GIT_BRANCH = 'main'
-        KUBECONFIG_CREDENTIAL_ID = 'your-kubeconfig-credentials-id'
+        KUBECONFIG_CREDENTIAL_ID = 'your-kubeconfig-credentials-id'  // 설정한 자격 증명 ID
     }
 
     stages {
@@ -47,8 +47,8 @@ pipeline {
                     sh 'sed -i "34s|.*|          image: ${DOCKER_IMAGE}:${env.BUILD_ID}|" k8s/petclinic-deployment.yaml'
                     
                     // Commit and push the changes
-                    sh 'git config user.email "you@example.com"'
-                    sh 'git config user.name "Your Name"'
+                    sh 'git config user.email "gurwns4643@gmail.com"'
+                    sh 'git config user.name "hyeokjun Kwon"'
                     sh 'git add k8s/petclinic-deployment.yaml'
                     sh 'git commit -m "Update image to ${DOCKER_IMAGE}:${env.BUILD_ID}"'
                     sh 'git push'
@@ -59,10 +59,10 @@ pipeline {
         stage('Sync with Argo CD') {
             steps {
                 script {
-                    withKubeConfig([credentialsId: "${KUBECONFIG_CREDENTIAL_ID}"]) {
+                    withCredentials([file(credentialsId: "${KUBECONFIG_CREDENTIAL_ID}", variable: 'KUBECONFIG')]) {
                         // Sync the application using kubectl
-                        sh 'kubectl apply -f k8s/petclinic-deployment.yaml'
-                        sh 'kubectl rollout status deployment/petclinic -n devops-tools'
+                        sh 'kubectl apply -f k8s/petclinic-deployment.yaml --kubeconfig=$KUBECONFIG'
+                        sh 'kubectl rollout status deployment/petclinic -n devops-tools --kubeconfig=$KUBECONFIG'
                     }
                 }
             }
