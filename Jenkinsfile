@@ -3,7 +3,6 @@ pipeline {
         docker {
             image 'docker:19.03.12'
             args '-u root -v /var/run/docker.sock:/var/run/docker.sock'
-            label 'jenkins-node' // 추가된 라벨 사용
         }
     }
 
@@ -14,8 +13,8 @@ pipeline {
         GIT_BRANCH = 'main'
         GIT_CREDENTIALS_ID = 'your-git-credentials-id'
         KUBECONFIG_CREDENTIAL_ID = 'your-kubeconfig-credentials-id'
-        DOCKERHUB_USERNAME = 'kwonhyeokjun'
-        DOCKERHUB_PASSWORD = 'kwon1715!'
+        DOCKERHUB_USERNAME = 'your-dockerhub-username'
+        DOCKERHUB_PASSWORD = 'your-dockerhub-password'
     }
 
     stages {
@@ -120,11 +119,6 @@ pipeline {
     }
 
     post {
-        always {
-            node('jenkins-node') {
-                cleanWs()
-            }
-        }
         success {
             echo 'The build and deployment were successful!'
         }
