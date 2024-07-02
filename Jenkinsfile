@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'kwonhyeokjun/jenkins-docker:latest'
+            args '-u root -v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
 
     environment {
         DOCKER_IMAGE = 'kwonhyeokjun/spring-petclinic'
@@ -11,6 +16,16 @@ pipeline {
     }
 
     stages {
+        stage('Ensure Docker Permissions') {
+            steps {
+                script {
+                    echo 'Ensuring Docker permissions...'
+                    sh 'chown root:docker /var/run/docker.sock'
+                    sh 'chmod 666 /var/run/docker.sock'
+                }
+            }
+        }
+
         stage('Checkout') {
             steps {
                 script {
