@@ -38,10 +38,8 @@ pipeline {
             steps {
                 script {
                     echo 'Building Docker image...'
-                    sh 'whoami'
-                    sh 'groups'
-                    sh 'ls -l /var/run/docker.sock'
-                    dockerImage = docker.build("${DOCKER_IMAGE}:${env.BUILD_ID}")
+                    // Running as root for debugging
+                    sh 'sudo docker build -t ${DOCKER_IMAGE}:${env.BUILD_ID} .'
                 }
             }
         }
