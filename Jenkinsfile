@@ -88,7 +88,9 @@ pipeline {
                     sh 'git config user.name "hyeokjun Kwon"'
                     sh 'git add k8s/petclinic-deployment.yaml'
                     sh 'git commit -m "Update image to ${DOCKER_IMAGE}:${env.BUILD_ID}"'
-                    sh 'git push https://${GIT_CREDENTIALS_ID}@github.com/K-hyeokjun/spring-petclinic-docker'
+                    withCredentials([usernamePassword(credentialsId: "${GIT_CREDENTIALS_ID}", usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                        sh 'git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/K-hyeokjun/spring-petclinic-docker ${GIT_BRANCH}'
+                    }
                 }
             }
         }
@@ -121,7 +123,6 @@ pipeline {
     post {
         always {
             node {
-            script {
                 cleanWs()
             }
         }
