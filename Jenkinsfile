@@ -13,8 +13,8 @@ pipeline {
         GIT_BRANCH = 'main'
         GIT_CREDENTIALS_ID = 'your-git-credentials-id'
         KUBECONFIG_CREDENTIAL_ID = 'your-kubeconfig-credentials-id'
-        DOCKERHUB_USERNAME = 'your-dockerhub-username'
-        DOCKERHUB_PASSWORD = 'your-dockerhub-password'
+        DOCKERHUB_USERNAME = 'kownhyeokjun'
+        DOCKERHUB_PASSWORD = 'kwon1715!'
     }
 
     stages {
