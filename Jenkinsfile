@@ -11,16 +11,6 @@ pipeline {
     }
 
     stages {
-        stage('Ensure Docker Permissions') {
-            steps {
-                script {
-                    echo 'Ensuring Docker permissions...'
-                    sh 'sudo chown root:docker /var/run/docker.sock'
-                    sh 'sudo chmod 666 /var/run/docker.sock'
-                }
-            }
-        }
-
         stage('Checkout') {
             steps {
                 script {
