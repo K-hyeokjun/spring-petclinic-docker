@@ -16,6 +16,15 @@ pipeline {
     }
 
     stages {
+        stage('Ensure Docker Permissions') {
+            steps {
+                script {
+                    sh 'chown root:docker /var/run/docker.sock'
+                    sh 'chmod 660 /var/run/docker.sock'
+                }
+            }
+        }
+
         stage('Checkout') {
             steps {
                 script {
