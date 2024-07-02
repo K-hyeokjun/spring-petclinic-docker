@@ -122,9 +122,7 @@ pipeline {
 
     post {
         always {
-            node {
                 cleanWs()
-            }
         }
         success {
             echo 'The build and deployment were successful!'
