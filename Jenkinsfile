@@ -43,7 +43,7 @@ pipeline {
             steps {
                 script {
                     echo 'Building Docker image...'
-                    dockerImage = docker.build("${DOCKER_IMAGE}:${env.BUILD_ID}")
+                    sh 'docker build -t ${DOCKER_IMAGE}:${env.BUILD_ID} .'
                 }
             }
         }
@@ -53,8 +53,8 @@ pipeline {
                 script {
                     echo 'Pushing Docker image to registry...'
                     docker.withRegistry('', "${DOCKER_CREDENTIALS_ID}") {
-                        dockerImage.push()
-                        dockerImage.push("latest")
+                        sh 'docker push ${DOCKER_IMAGE}:${env.BUILD_ID}'
+                        sh 'docker push ${DOCKER_IMAGE}:latest'
                     }
                 }
             }
