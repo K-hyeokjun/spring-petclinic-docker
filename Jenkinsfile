@@ -11,7 +11,7 @@ pipeline {
         DOCKER_CREDENTIALS_ID = 'dockerhub-credentials-id'
         GIT_REPO_URL = 'https://github.com/K-hyeokjun/spring-petclinic-docker'
         GIT_BRANCH = 'main'
-        GIT_CREDENTIALS_ID = 'your-git-credentials-id'  // Git credentials 추가
+        GIT_CREDENTIALS_ID = 'your-git-credentials-id'
         KUBECONFIG_CREDENTIAL_ID = 'your-kubeconfig-credentials-id'
     }
 
@@ -38,6 +38,9 @@ pipeline {
             steps {
                 script {
                     echo 'Building Docker image...'
+                    sh 'whoami'
+                    sh 'groups'
+                    sh 'ls -l /var/run/docker.sock'
                     dockerImage = docker.build("${DOCKER_IMAGE}:${env.BUILD_ID}")
                 }
             }
