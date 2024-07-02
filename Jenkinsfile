@@ -1,8 +1,25 @@
 pipeline {
     agent {
-        docker {
-            image 'docker:19.03.12'
-            args '-u root -v /var/run/docker.sock:/var/run/docker.sock'
+        kubernetes {
+            label 'jenkins-agent'
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: docker
+    image: docker:19.03.12
+    command:
+    - cat
+    tty: true
+    volumeMounts:
+    - name: docker-sock
+      mountPath: /var/run/docker.sock
+  volumes:
+  - name: docker-sock
+    hostPath:
+      path: /var/run/docker.sock
+"""
         }
     }
 
@@ -19,8 +36,8 @@ pipeline {
         stage('Ensure Docker Permissions') {
             steps {
                 script {
-                    sh 'sudo chown root:docker /var/run/docker.sock'
-                    sh 'sudo chmod 660 /var/run/docker.sock'
+                    sh 'chown root:docker /var/run/docker.sock'
+                    sh 'chmod 660 /var/run/docker.sock'
                 }
             }
         }
@@ -84,8 +101,8 @@ pipeline {
                 script {
                     echo 'Updating Kubernetes manifests...'
                     sh 'sed -i "34s|.*|          image: ${DOCKER_IMAGE}:${env.BUILD_ID}|" k8s/petclinic-deployment.yaml'
-                    sh 'git config user.email "gurwns4643@gmail.com"'
-                    sh 'git config user.name "hyeokjun Kwon"'
+                    sh 'git config user.email "your-email@example.com"'
+                    sh 'git config user.name "your-name"'
                     sh 'git add k8s/petclinic-deployment.yaml'
                     sh 'git commit -m "Update image to ${DOCKER_IMAGE}:${env.BUILD_ID}"'
                     withCredentials([usernamePassword(credentialsId: "${GIT_CREDENTIALS_ID}", usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
