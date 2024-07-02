@@ -22,19 +22,13 @@ pipeline {
             }
         }
 
-        stage('Docker Build') {
-            steps {
-                script {
-                    dockerImage = docker.build("${DOCKER_IMAGE}:${env.BUILD_ID}")
-                }
-            }
-        }
-
-        stage('Docker Push') {
+        stage('Docker Build & Push') {
             steps {
                 script {
                     docker.withRegistry('', "${DOCKER_CREDENTIALS_ID}") {
+                        def dockerImage = docker.build("${DOCKER_IMAGE}:${env.BUILD_ID}")
                         dockerImage.push()
+                        dockerImage.push("latest")
                     }
                 }
             }
