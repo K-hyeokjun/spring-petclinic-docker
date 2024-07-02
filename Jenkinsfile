@@ -13,14 +13,16 @@ pipeline {
         GIT_BRANCH = 'main'
         GIT_CREDENTIALS_ID = 'your-git-credentials-id'
         KUBECONFIG_CREDENTIAL_ID = 'your-kubeconfig-credentials-id'
+        DOCKERHUB_USERNAME = 'kwonhyeokjun' // Ensure this is set in Jenkins
+        DOCKERHUB_PASSWORD = 'kwon1715!' // Ensure this is set in Jenkins
     }
 
     stages {
         stage('Ensure Docker Permissions') {
             steps {
                 script {
-                    sh 'sudo chown root:docker /var/run/docker.sock'
-                    sh 'sudo chmod 660 /var/run/docker.sock'
+                    sh 'chown root:docker /var/run/docker.sock'
+                    sh 'chmod 660 /var/run/docker.sock'
                 }
             }
         }
@@ -47,7 +49,7 @@ pipeline {
             steps {
                 script {
                     echo 'Building Docker image...'
-                    sh 'sudo docker build -t ${DOCKER_IMAGE}:${env.BUILD_ID} .'
+                    sh 'docker build -t ${DOCKER_IMAGE}:${env.BUILD_ID} .'
                 }
             }
         }
@@ -56,9 +58,9 @@ pipeline {
             steps {
                 script {
                     echo 'Pushing Docker image to registry...'
-                    sh 'sudo docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD'
-                    sh 'sudo docker push ${DOCKER_IMAGE}:${env.BUILD_ID}'
-                    sh 'sudo docker push ${DOCKER_IMAGE}:latest'
+                    sh 'docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD'
+                    sh 'docker push ${DOCKER_IMAGE}:${env.BUILD_ID}'
+                    sh 'docker push ${DOCKER_IMAGE}:latest'
                 }
             }
         }
@@ -118,9 +120,7 @@ pipeline {
 
     post {
         always {
-            node('built-in') { // Use built-in node
-                cleanWs()
-            }
+            cleanWs()
         }
         success {
             echo 'The build and deployment were successful!'
