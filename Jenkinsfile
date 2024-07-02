@@ -11,6 +11,7 @@ pipeline {
         DOCKER_CREDENTIALS_ID = 'dockerhub-credentials-id'
         GIT_REPO_URL = 'https://github.com/K-hyeokjun/spring-petclinic-docker'
         GIT_BRANCH = 'main'
+        GIT_CREDENTIALS_ID = 'your-git-credentials-id'  // Git credentials 추가
         KUBECONFIG_CREDENTIAL_ID = 'your-kubeconfig-credentials-id'
     }
 
@@ -19,7 +20,7 @@ pipeline {
             steps {
                 script {
                     echo 'Checking out code from Git...'
-                    git branch: "${GIT_BRANCH}", url: "${GIT_REPO_URL}"
+                    git branch: "${GIT_BRANCH}", url: "${GIT_REPO_URL}", credentialsId: "${GIT_CREDENTIALS_ID}"
                 }
             }
         }
@@ -72,10 +73,7 @@ pipeline {
             steps {
                 script {
                     echo 'Updating Kubernetes manifests...'
-                    // Update Kubernetes deployment YAML file with new Docker image tag
                     sh 'sed -i "34s|.*|          image: ${DOCKER_IMAGE}:${env.BUILD_ID}|" k8s/petclinic-deployment.yaml'
-                    
-                    // Commit and push the changes
                     sh 'git config user.email "gurwns4643@gmail.com"'
                     sh 'git config user.name "hyeokjun Kwon"'
                     sh 'git add k8s/petclinic-deployment.yaml'
@@ -102,7 +100,6 @@ pipeline {
                 script {
                     echo 'Syncing with Argo CD...'
                     withCredentials([file(credentialsId: "${KUBECONFIG_CREDENTIAL_ID}", variable: 'KUBECONFIG')]) {
-                        // Sync the application using kubectl
                         sh 'kubectl apply -f k8s/petclinic-deployment.yaml --kubeconfig=$KUBECONFIG'
                         sh 'kubectl rollout status deployment/petclinic -n devops-tools --kubeconfig=$KUBECONFIG'
                     }
@@ -113,7 +110,9 @@ pipeline {
 
     post {
         always {
-            cleanWs()
+            node {
+                cleanWs()
+            }
         }
         success {
             echo 'The build and deployment were successful!'
