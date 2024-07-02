@@ -16,6 +16,16 @@ pipeline {
     }
 
     stages {
+        stage('Ensure Docker Permissions') {
+            steps {
+                script {
+                    echo 'Ensuring Docker permissions...'
+                    sh 'chown root:docker /var/run/docker.sock'
+                    sh 'chmod 666 /var/run/docker.sock'
+                }
+            }
+        }
+
         stage('Checkout') {
             steps {
                 script {
@@ -110,7 +120,9 @@ pipeline {
 
     post {
         always {
-            cleanWs()
+            script {
+                cleanWs()
+            }
         }
         success {
             echo 'The build and deployment were successful!'
