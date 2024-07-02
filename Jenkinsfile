@@ -118,7 +118,7 @@ pipeline {
 
     post {
         always {
-            node {
+            node('built-in') { // Use built-in node
                 cleanWs()
             }
         }
