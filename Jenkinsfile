@@ -82,4 +82,48 @@ pipeline {
                     sh 'git config user.email "gurwns4643@gmail.com"'
                     sh 'git config user.name "hyeokjun Kwon"'
                     sh 'git add k8s/petclinic-deployment.yaml'
-                    sh 'git commit -m "Update image to ${DOCKER
+                    sh 'git commit -m "Update image to ${DOCKER_IMAGE}:${env.BUILD_ID}"'
+                    withCredentials([usernamePassword(credentialsId: "${GIT_CREDENTIALS_ID}", usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                        sh 'git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/K-hyeokjun/spring-petclinic-docker ${GIT_BRANCH}'
+                    }
+                }
+            }
+        }
+
+        stage('Deploy PetClinic') {
+            steps {
+                script {
+                    echo 'Deploying PetClinic application...'
+                    withCredentials([file(credentialsId: "${KUBECONFIG_CREDENTIAL_ID}", variable: 'KUBECONFIG')]) {
+                        sh 'kubectl apply -f k8s/petclinic-deployment.yaml --kubeconfig=$KUBECONFIG'
+                        sh 'kubectl apply -f k8s/petclinic-service.yaml --kubeconfig=$KUBECONFIG'
+                    }
+                }
+            }
+        }
+
+        stage('Sync with Argo CD') {
+            steps {
+                script {
+                    echo 'Syncing with Argo CD...'
+                    withCredentials([file(credentialsId: "${KUBECONFIG_CREDENTIAL_ID}", variable: 'KUBECONFIG')]) {
+                        sh 'kubectl apply -f k8s/petclinic-deployment.yaml --kubeconfig=$KUBECONFIG'
+                        sh 'kubectl rollout status deployment/petclinic -n devops-tools --kubeconfig=$KUBECONFIG'
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+        success {
+            echo 'The build and deployment were successful!'
+        }
+        failure {
+            echo 'The build or deployment failed.'
+        }
+    }
+}
