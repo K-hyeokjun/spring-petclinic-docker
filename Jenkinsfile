@@ -13,25 +13,14 @@ pipeline {
         GIT_BRANCH = 'main'
         GIT_CREDENTIALS_ID = 'your-git-credentials-id'
         KUBECONFIG_CREDENTIAL_ID = 'your-kubeconfig-credentials-id'
-        DOCKERHUB_USERNAME = 'kownhyeokjun'
-        DOCKERHUB_PASSWORD = 'kwon1715!'
     }
 
     stages {
-        stage('Ensure Docker Permissions') {
-            steps {
-                script {
-                    sh 'chown root:docker /var/run/docker.sock'
-                    sh 'chmod 660 /var/run/docker.sock'
-                }
-            }
-        }
-
         stage('Checkout') {
             steps {
                 script {
                     echo 'Checking out code from Git...'
-                    git branch: "${GIT_BRANCH}", url: "${GIT_REPO_URL}", credentialsId: "${GIT_CREDENTIALS_ID}"
+                    git branch: "${GIT_BRANCH}", url: "${GIT_REPO_URL}", credentialsId: "your-git-credentials-id"
                 }
             }
         }
@@ -58,9 +47,11 @@ pipeline {
             steps {
                 script {
                     echo 'Pushing Docker image to registry...'
-                    sh 'docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD'
-                    sh 'docker push ${DOCKER_IMAGE}:${env.BUILD_ID}'
-                    sh 'docker push ${DOCKER_IMAGE}:latest'
+                    withCredentials([usernamePassword(credentialsId: "dockerhub-credentials-id", usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
+                        sh 'docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD'
+                        sh 'docker push ${DOCKER_IMAGE}:${env.BUILD_ID}'
+                        sh 'docker push ${DOCKER_IMAGE}:latest'
+                    }
                 }
             }
         }
@@ -69,7 +60,7 @@ pipeline {
             steps {
                 script {
                     echo 'Deploying MySQL...'
-                    withCredentials([file(credentialsId: "${KUBECONFIG_CREDENTIAL_ID}", variable: 'KUBECONFIG')]) {
+                    withCredentials([file(credentialsId: "your-kubeconfig-credentials-id", variable: 'KUBECONFIG')]) {
                         sh 'kubectl apply -f k8s/mysql-config-persistentvolumeclaim.yaml --kubeconfig=$KUBECONFIG'
                         sh 'kubectl apply -f k8s/mysql-data-persistentvolumeclaim.yaml --kubeconfig=$KUBECONFIG'
                         sh 'kubectl apply -f k8s/mysql-deployment.yaml --kubeconfig=$KUBECONFIG'
@@ -88,7 +79,9 @@ pipeline {
                     sh 'git config user.name "hyeokjun Kwon"'
                     sh 'git add k8s/petclinic-deployment.yaml'
                     sh 'git commit -m "Update image to ${DOCKER_IMAGE}:${env.BUILD_ID}"'
-                    sh 'git push'
+                    withCredentials([usernamePassword(credentialsId: "your-git-credentials-id", usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                        sh 'git push https://${GIT_USERNAME}:${GIT_PASSWORD}@${GIT_REPO_URL} ${GIT_BRANCH}'
+                    }
                 }
             }
         }
@@ -97,7 +90,7 @@ pipeline {
             steps {
                 script {
                     echo 'Deploying PetClinic application...'
-                    withCredentials([file(credentialsId: "${KUBECONFIG_CREDENTIAL_ID}", variable: 'KUBECONFIG')]) {
+                    withCredentials([file(credentialsId: "your-kubeconfig-credentials-id", variable: 'KUBECONFIG')]) {
                         sh 'kubectl apply -f k8s/petclinic-deployment.yaml --kubeconfig=$KUBECONFIG'
                         sh 'kubectl apply -f k8s/petclinic-service.yaml --kubeconfig=$KUBECONFIG'
                     }
@@ -109,7 +102,7 @@ pipeline {
             steps {
                 script {
                     echo 'Syncing with Argo CD...'
-                    withCredentials([file(credentialsId: "${KUBECONFIG_CREDENTIAL_ID}", variable: 'KUBECONFIG')]) {
+                    withCredentials([file(credentialsId: "your-kubeconfig-credentials-id", variable: 'KUBECONFIG')]) {
                         sh 'kubectl apply -f k8s/petclinic-deployment.yaml --kubeconfig=$KUBECONFIG'
                         sh 'kubectl rollout status deployment/petclinic -n devops-tools --kubeconfig=$KUBECONFIG'
                     }
