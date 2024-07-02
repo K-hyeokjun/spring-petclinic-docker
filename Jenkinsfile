@@ -1,7 +1,7 @@
 pipeline {
     agent {
         docker {
-            image 'kwonhyeokjun/jenkins-docker:latest'
+            image 'docker:19.03.12'
             args '-u root -v /var/run/docker.sock:/var/run/docker.sock'
         }
     }
@@ -20,8 +20,14 @@ pipeline {
             steps {
                 script {
                     echo 'Ensuring Docker permissions...'
-                    sh 'chown root:docker /var/run/docker.sock'
-                    sh 'chmod 666 /var/run/docker.sock'
+                    sh '''
+                        if ! getent group docker; then
+                            groupadd docker
+                        fi
+                        usermod -aG docker jenkins
+                        chown root:docker /var/run/docker.sock
+                        chmod 666 /var/run/docker.sock
+                    '''
                 }
             }
         }
