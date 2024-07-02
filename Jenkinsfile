@@ -11,8 +11,8 @@ pipeline {
         DOCKER_CREDENTIALS_ID = 'dockerhub-credentials-id'
         GIT_REPO_URL = 'https://github.com/K-hyeokjun/spring-petclinic-docker'
         GIT_BRANCH = 'main'
-        GIT_CREDENTIALS_ID = 'your-git-credentials-id'
-        KUBECONFIG_CREDENTIAL_ID = 'your-kubeconfig-credentials-id'
+        GIT_CREDENTIALS_ID = 'your-git-credentials-id'  // 실제 Jenkins에서 설정한 Git 자격 증명 ID로 변경
+        KUBECONFIG_CREDENTIAL_ID = 'your-kubeconfig-credentials-id'  // 실제 Jenkins에서 설정한 Kubeconfig 자격 증명 ID로 변경
     }
 
     stages {
@@ -88,7 +88,7 @@ pipeline {
                     sh 'git config user.name "hyeokjun Kwon"'
                     sh 'git add k8s/petclinic-deployment.yaml'
                     sh 'git commit -m "Update image to ${DOCKER_IMAGE}:${env.BUILD_ID}"'
-                    sh 'git push'
+                    sh 'git push https://${GIT_CREDENTIALS_ID}@github.com/K-hyeokjun/spring-petclinic-docker'
                 }
             }
         }
