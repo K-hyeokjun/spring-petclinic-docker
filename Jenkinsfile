@@ -20,14 +20,8 @@ pipeline {
             steps {
                 script {
                     echo 'Ensuring Docker permissions...'
-                    sh '''
-                        if ! getent group docker; then
-                            groupadd docker
-                        fi
-                        usermod -aG docker jenkins
-                        chown root:docker /var/run/docker.sock
-                        chmod 666 /var/run/docker.sock
-                    '''
+                    sh 'chown root:docker /var/run/docker.sock'
+                    sh 'chmod 666 /var/run/docker.sock'
                 }
             }
         }
@@ -128,7 +122,7 @@ pipeline {
 
     post {
         always {
-            cleanWs()
+                cleanWs()
         }
         success {
             echo 'The build and deployment were successful!'
