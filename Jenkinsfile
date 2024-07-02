@@ -2,7 +2,7 @@ pipeline {
     agent {
         docker {
             image 'docker:19.03.12'
-            args '-u root:root -v /var/run/docker.sock:/var/run/docker.sock'
+            args '-u root -v /var/run/docker.sock:/var/run/docker.sock'
         }
     }
 
