@@ -1,18 +1,13 @@
 pipeline {
-    agent {
-        docker {
-            image 'docker:19.03.12'
-            args '-u root -v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
+    agent any
 
     environment {
         DOCKER_IMAGE = 'kwonhyeokjun/spring-petclinic'
         DOCKER_CREDENTIALS_ID = 'dockerhub-credentials-id'
         GIT_REPO_URL = 'https://github.com/K-hyeokjun/spring-petclinic-docker'
         GIT_BRANCH = 'main'
-        GIT_CREDENTIALS_ID = 'your-git-credentials-id'  // replace with your actual Git credentials ID
-        KUBECONFIG_CREDENTIAL_ID = 'your-kubeconfig-credentials-id'  // replace with your actual Kubeconfig credentials ID
+        GIT_CREDENTIALS_ID = 'your-git-credentials-id'
+        KUBECONFIG_CREDENTIAL_ID = 'your-kubeconfig-credentials-id'
     }
 
     stages {
@@ -20,18 +15,8 @@ pipeline {
             steps {
                 script {
                     echo 'Ensuring Docker permissions...'
-                    sh 'chown root:docker /var/run/docker.sock'
-                    sh 'chmod 666 /var/run/docker.sock'
-                    sh 'ls -l /var/run/docker.sock'
-                }
-            }
-        }
-
-        stage('Print Environment Variables') {
-            steps {
-                script {
-                    echo 'Printing environment variables...'
-                    sh 'printenv'
+                    sh 'chown root:docker /var/run/docker.sock || true'
+                    sh 'chmod 666 /var/run/docker.sock || true'
                 }
             }
         }
