@@ -38,25 +38,23 @@ pipeline {
             steps {
                 script {
                     echo 'Building Docker image...'
-                    sh 'whoami'
-                    sh 'groups'
-                    sh 'ls -l /var/run/docker.sock'
                     dockerImage = docker.build("${DOCKER_IMAGE}:${env.BUILD_ID}")
                 }
             }
         }
 
-        stage('Docker Push') {
-            steps {
-                script {
-                    echo 'Pushing Docker image to registry...'
-                    docker.withRegistry('', "${DOCKER_CREDENTIALS_ID}") {
-                        dockerImage.push()
-                        dockerImage.push("latest")
-                    }
-                }
-            }
-        }
+        // Uncomment if needed
+        // stage('Docker Push') {
+        //     steps {
+        //         script {
+        //             echo 'Pushing Docker image to registry...'
+        //             docker.withRegistry('', "${DOCKER_CREDENTIALS_ID}") {
+        //                 dockerImage.push()
+        //                 dockerImage.push("latest")
+        //             }
+        //         }
+        //     }
+        // }
 
         stage('Deploy MySQL') {
             steps {
