@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'docker:19.03.12'
+            args '-u root -v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
 
     environment {
         DOCKER_IMAGE = 'kwonhyeokjun/spring-petclinic'
@@ -15,8 +20,8 @@ pipeline {
             steps {
                 script {
                     echo 'Ensuring Docker permissions...'
-                    sh 'chown root:docker /var/run/docker.sock || true'
-                    sh 'chmod 666 /var/run/docker.sock || true'
+                    sh 'chown root:docker /var/run/docker.sock'
+                    sh 'chmod 666 /var/run/docker.sock'
                 }
             }
         }
@@ -43,7 +48,7 @@ pipeline {
             steps {
                 script {
                     echo 'Building Docker image...'
-                    sh 'docker build -t ${DOCKER_IMAGE}:${env.BUILD_ID} .'
+                    dockerImage = docker.build("${DOCKER_IMAGE}:${env.BUILD_ID}")
                 }
             }
         }
@@ -53,8 +58,8 @@ pipeline {
                 script {
                     echo 'Pushing Docker image to registry...'
                     docker.withRegistry('', "${DOCKER_CREDENTIALS_ID}") {
-                        sh 'docker push ${DOCKER_IMAGE}:${env.BUILD_ID}'
-                        sh 'docker push ${DOCKER_IMAGE}:latest'
+                        dockerImage.push()
+                        dockerImage.push("latest")
                     }
                 }
             }
