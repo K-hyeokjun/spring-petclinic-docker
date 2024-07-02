@@ -16,6 +16,15 @@ pipeline {
     }
 
     stages {
+        stage('Ensure Docker Permissions') {
+            steps {
+                script {
+                    sh 'sudo chown root:docker /var/run/docker.sock'
+                    sh 'sudo chmod 660 /var/run/docker.sock'
+                }
+            }
+        }
+
         stage('Checkout') {
             steps {
                 script {
@@ -38,24 +47,21 @@ pipeline {
             steps {
                 script {
                     echo 'Building Docker image...'
-                    // Running as root for debugging
                     sh 'sudo docker build -t ${DOCKER_IMAGE}:${env.BUILD_ID} .'
                 }
             }
         }
 
-        // Uncomment if needed
-        // stage('Docker Push') {
-        //     steps {
-        //         script {
-        //             echo 'Pushing Docker image to registry...'
-        //             docker.withRegistry('', "${DOCKER_CREDENTIALS_ID}") {
-        //                 dockerImage.push()
-        //                 dockerImage.push("latest")
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Docker Push') {
+            steps {
+                script {
+                    echo 'Pushing Docker image to registry...'
+                    sh 'sudo docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD'
+                    sh 'sudo docker push ${DOCKER_IMAGE}:${env.BUILD_ID}'
+                    sh 'sudo docker push ${DOCKER_IMAGE}:latest'
+                }
+            }
+        }
 
         stage('Deploy MySQL') {
             steps {
@@ -112,7 +118,7 @@ pipeline {
 
     post {
         always {
-            node('built-in') { // Use built-in node
+            node {
                 cleanWs()
             }
         }
