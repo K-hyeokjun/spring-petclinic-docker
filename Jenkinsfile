@@ -15,8 +15,8 @@ pipeline {
             steps {
                 script {
                     echo 'Ensuring Docker permissions...'
-                    sh 'chown root:docker /var/run/docker.sock'
-                    sh 'chmod 666 /var/run/docker.sock'
+                    sh 'sudo chown root:docker /var/run/docker.sock'
+                    sh 'sudo chmod 666 /var/run/docker.sock'
                 }
             }
         }
