@@ -13,8 +13,8 @@ pipeline {
         GIT_BRANCH = 'main'
         GIT_CREDENTIALS_ID = 'your-git-credentials-id'
         KUBECONFIG_CREDENTIAL_ID = 'your-kubeconfig-credentials-id'
-        DOCKERHUB_USERNAME = 'your-dockerhub-username' // Ensure this is set in Jenkins
-        DOCKERHUB_PASSWORD = 'your-dockerhub-password' // Ensure this is set in Jenkins
+        DOCKERHUB_USERNAME = 'kwonhyeokjun'
+        DOCKERHUB_PASSWORD = 'kwon1715!'
     }
 
     stages {
@@ -120,7 +120,7 @@ pipeline {
 
     post {
         always {
-            node('any') { // Specify a label for the node
+            node('Built-In Node') {
                 cleanWs()
             }
         }
