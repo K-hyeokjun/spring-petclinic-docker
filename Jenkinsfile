@@ -11,8 +11,8 @@ pipeline {
         DOCKER_CREDENTIALS_ID = 'dockerhub-credentials-id'
         GIT_REPO_URL = 'https://github.com/K-hyeokjun/spring-petclinic-docker'
         GIT_BRANCH = 'main'
-        GIT_CREDENTIALS_ID = 'your-git-credentials-id'  // 실제 Jenkins에서 설정한 Git 자격 증명 ID로 변경
-        KUBECONFIG_CREDENTIAL_ID = 'your-kubeconfig-credentials-id'  // 실제 Jenkins에서 설정한 Kubeconfig 자격 증명 ID로 변경
+        GIT_CREDENTIALS_ID = 'your-git-credentials-id'  // replace with your actual Git credentials ID
+        KUBECONFIG_CREDENTIAL_ID = 'your-kubeconfig-credentials-id'  // replace with your actual Kubeconfig credentials ID
     }
 
     stages {
@@ -22,6 +22,16 @@ pipeline {
                     echo 'Ensuring Docker permissions...'
                     sh 'chown root:docker /var/run/docker.sock'
                     sh 'chmod 666 /var/run/docker.sock'
+                    sh 'ls -l /var/run/docker.sock'
+                }
+            }
+        }
+
+        stage('Print Environment Variables') {
+            steps {
+                script {
+                    echo 'Printing environment variables...'
+                    sh 'printenv'
                 }
             }
         }
@@ -122,7 +132,7 @@ pipeline {
 
     post {
         always {
-                cleanWs()
+            cleanWs()
         }
         success {
             echo 'The build and deployment were successful!'
