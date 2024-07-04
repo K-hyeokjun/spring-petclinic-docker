@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: spring-petclinic
+  name: petclinic
   labels:
-    app: spring-petclinic
+    app: petclinic
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: spring-petclinic
+      app: petclinic
   template:
     metadata:
       labels:
-        app: spring-petclinic
+        app: petclinic
     spec:
       containers:
-      - name: spring-petclinic
+      - name: petclinic
         image: kwonhyeokjun/myjenkins-blueocean:latest
         imagePullPolicy: IfNotPresent
         env:
@@ -26,4 +26,6 @@ spec:
         ports:
         - containerPort: 8080
           protocol: TCP
+      imagePullSecrets:
+      - name: my-dockerhub-secret
       restartPolicy: Always
