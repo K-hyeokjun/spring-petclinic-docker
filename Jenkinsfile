@@ -115,7 +115,7 @@ pipeline {
         stage('Delete Existing Deployment') {
             steps {
                 script {
-                    withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                    withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) { // Kubeconfig 파일 자격 증명 설정
                         sh '''
                         kubectl delete deployment petclinic -n default || true
                         '''
@@ -127,7 +127,7 @@ pipeline {
         stage('Deploy to EKS') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'Argocd-credentials', usernameVariable: 'ARGOCD_USERNAME', passwordVariable: 'ARGOCD_PASSWORD')]) {
+                    withCredentials([usernamePassword(credentialsId: 'Argocd-credentials', usernameVariable: 'ARGOCD_USERNAME', passwordVariable: 'ARGOCD_PASSWORD')]) { // ArgoCD 자격 증명 설정
                         sh '''
                         argocd login ${ARGOCD_SERVER} --username ${ARGOCD_USERNAME} --password ${ARGOCD_PASSWORD} --insecure --grpc-web
                         argocd app wait ${ARGOCD_APP_NAME} --operation in-progress
