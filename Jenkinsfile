@@ -104,6 +104,16 @@ pipeline {
             }
         }
 
+        stage('Delete Existing Deployment') {
+            steps {
+                script {
+                    sh '''
+                    kubectl delete deployment petclinic -n default || true
+                    '''
+                }
+            }
+        }
+
         stage('Deploy to EKS') {
             steps {
                 script {
