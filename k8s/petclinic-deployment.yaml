@@ -3,16 +3,16 @@ kind: Deployment
 metadata:
   name: petclinic
   labels:
-    app: petclinic
+    app: spring-petclinic  # 변경된 부분 -> petclinic
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: petclinic
+      app: spring-petclinic  # 변경된 부분 -> petclinic 
   template:
     metadata:
       labels:
-        app: petclinic
+        app: spring-petclinic  # 변경된 부분 -> petclinic
     spec:
       containers:
       - name: petclinic
