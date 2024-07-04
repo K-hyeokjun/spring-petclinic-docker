@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_CREDENTIALS_ID = 'dockerhub' // Docker Hub 자격 증명 ID
+        DOCKER_CREDENTIALS_ID = 'Dockerhub' // Docker Hub 자격 증명 ID
         GIT_REPO = 'https://github.com/K-hyeokjun/spring-petclinic-docker.git'
         BRANCH_NAME = 'main'
         ARGOCD_SERVER = 'a3823903901c24a01bcade663ec3457d-1327040958.ap-northeast-2.elb.amazonaws.com'
