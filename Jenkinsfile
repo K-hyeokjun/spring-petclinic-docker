@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_CREDENTIALS_ID = 'Dockerhub' // Docker Hub 자격 증명 ID
+        DOCKER_CREDENTIALS_ID = 'dockerhub' // Docker Hub 자격 증명 ID
         GIT_REPO = 'https://github.com/K-hyeokjun/spring-petclinic-docker.git'
         BRANCH_NAME = 'main'
         ARGOCD_SERVER = 'a3823903901c24a01bcade663ec3457d-1327040958.ap-northeast-2.elb.amazonaws.com'
@@ -84,6 +84,23 @@ pipeline {
                         error "k8s/petclinic-deployment.yaml file not found"
                     }
                 }
+            }
+        }
+
+        stage('Install ArgoCD CLI') {
+            steps {
+                sh '''
+                if ! command -v argocd &> /dev/null
+                then
+                    echo "ArgoCD CLI could not be found. Installing..."
+                    curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+                    chmod +x argocd
+                    mv argocd /usr/local/bin/
+                else
+                    echo "ArgoCD CLI is installed"
+                    argocd version
+                fi
+                '''
             }
         }
 
