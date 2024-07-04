@@ -87,9 +87,20 @@ pipeline {
             }
         }
 
-        stage('Install ArgoCD CLI') {
+        stage('Install Tools') {
             steps {
                 sh '''
+                if ! command -v kubectl &> /dev/null
+                then
+                    echo "Kubectl could not be found. Installing..."
+                    curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
+                    chmod +x kubectl
+                    mv kubectl /usr/local/bin/
+                else
+                    echo "Kubectl is installed"
+                    kubectl version --client
+                fi
+                
                 if ! command -v argocd &> /dev/null
                 then
                     echo "ArgoCD CLI could not be found. Installing..."
@@ -120,6 +131,7 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'Argocd-credentials', usernameVariable: 'ARGOCD_USERNAME', passwordVariable: 'ARGOCD_PASSWORD')]) {
                         sh '''
                         argocd login ${ARGOCD_SERVER} --username ${ARGOCD_USERNAME} --password ${ARGOCD_PASSWORD} --insecure --grpc-web
+                        while argocd app wait ${ARGOCD_APP_NAME} --operation in-progress; do sleep 5; done
                         argocd app sync ${ARGOCD_APP_NAME} --prune
                         '''
                     }
