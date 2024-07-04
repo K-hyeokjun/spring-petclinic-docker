@@ -130,8 +130,7 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'Argocd-credentials', usernameVariable: 'ARGOCD_USERNAME', passwordVariable: 'ARGOCD_PASSWORD')]) {
                         sh '''
                         argocd login ${ARGOCD_SERVER} --username ${ARGOCD_USERNAME} --password ${ARGOCD_PASSWORD} --insecure --grpc-web
-                        argocd app wait ${ARGOCD_APP_NAME} --operation in-progress
-                        argocd app sync ${ARGOCD_APP_NAME} --prune
+                        argocd app sync ${ARGOCD_APP_NAME} --prune --force
                         '''
                     }
                 }
