@@ -7,7 +7,7 @@ pipeline {
         BRANCH_NAME = 'main'
         ARGOCD_SERVER = 'a3823903901c24a01bcade663ec3457d-1327040958.ap-northeast-2.elb.amazonaws.com'
         ARGOCD_APP_NAME = 'spring-petclinic'
-        DOCKER_IMAGE = 'kwonhyeokjun/myjenkins-blueocean' // Docker Hub 이미지 이름
+        DOCKER_IMAGE = 'kwonhyeokjun/spring-petclinic' // Docker Hub 이미지 이름
     }
 
     stages {
@@ -115,7 +115,7 @@ pipeline {
         stage('Delete Existing Deployment') {
             steps {
                 script {
-                    withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) { // Kubeconfig 파일 자격 증명 설정
+                    withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                         sh '''
                         kubectl delete deployment petclinic -n default || true
                         '''
@@ -127,7 +127,7 @@ pipeline {
         stage('Deploy to EKS') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'Argocd-credentials', usernameVariable: 'ARGOCD_USERNAME', passwordVariable: 'ARGOCD_PASSWORD')]) { // ArgoCD 자격 증명 설정
+                    withCredentials([usernamePassword(credentialsId: 'Argocd-credentials', usernameVariable: 'ARGOCD_USERNAME', passwordVariable: 'ARGOCD_PASSWORD')]) {
                         sh '''
                         argocd login ${ARGOCD_SERVER} --username ${ARGOCD_USERNAME} --password ${ARGOCD_PASSWORD} --insecure --grpc-web
                         argocd app wait ${ARGOCD_APP_NAME} --operation in-progress
