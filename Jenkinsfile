@@ -25,10 +25,14 @@ pipeline {
                         returnStdout: true
                     ).trim()
 
-                    def tags = tagsOutput.readLines().collect { it.split(':')[1]?.replace('"', '')?.replace('}', '')?.trim() }.findAll { it }
+                    def tags = tagsOutput.tokenize('\n').collect { line ->
+                        def parts = line.tokenize(':')
+                        return parts.size() > 1 ? parts[1].replace('"', '').replace('}', '').trim() : null
+                    }.findAll { it }
+
                     echo "Existing tags in Docker Hub: ${tags}"
 
-                    def latestTag = tags.collect { it.tokenize('.').collect { it.toInteger() } }.max { a, b -> 
+                    def latestTag = tags.collect { it.tokenize('.').collect { it.toInteger() } }.max { a, b ->
                         for (i in 0..<Math.min(a.size(), b.size())) {
                             if (a[i] != b[i]) return a[i] <=> b[i]
                         }
