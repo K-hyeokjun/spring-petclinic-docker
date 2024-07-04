@@ -25,7 +25,7 @@ pipeline {
                         returnStdout: true
                     ).trim()
 
-                    def tags = tagsOutput.readLines().collect { it.split(':')[1].replace('"', '').replace('}', '').trim() }
+                    def tags = tagsOutput.readLines().collect { it.split(':')[1]?.replace('"', '')?.replace('}', '')?.trim() }.findAll { it }
                     echo "Existing tags in Docker Hub: ${tags}"
 
                     def latestTag = tags.collect { it.tokenize('.').collect { it.toInteger() } }.max { a, b -> 
@@ -107,7 +107,7 @@ pipeline {
         failure {
             echo 'The build or deployment failed.'
         }
-        /*
+        /* 
         always {
             script {
                 withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
