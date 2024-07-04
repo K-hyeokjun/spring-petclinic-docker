@@ -98,9 +98,7 @@ pipeline {
                     mv kubectl /usr/local/bin/
                 else
                     echo "Kubectl is installed"
-                    kubectl version --client
                 fi
-                
                 if ! command -v argocd &> /dev/null
                 then
                     echo "ArgoCD CLI could not be found. Installing..."
@@ -109,7 +107,6 @@ pipeline {
                     mv argocd /usr/local/bin/
                 else
                     echo "ArgoCD CLI is installed"
-                    argocd version
                 fi
                 '''
             }
@@ -118,9 +115,11 @@ pipeline {
         stage('Delete Existing Deployment') {
             steps {
                 script {
-                    sh '''
-                    kubectl delete deployment petclinic -n default || true
-                    '''
+                    withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                        sh '''
+                        kubectl delete deployment petclinic -n default || true
+                        '''
+                    }
                 }
             }
         }
@@ -131,7 +130,7 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'Argocd-credentials', usernameVariable: 'ARGOCD_USERNAME', passwordVariable: 'ARGOCD_PASSWORD')]) {
                         sh '''
                         argocd login ${ARGOCD_SERVER} --username ${ARGOCD_USERNAME} --password ${ARGOCD_PASSWORD} --insecure --grpc-web
-                        while argocd app wait ${ARGOCD_APP_NAME} --operation in-progress; do sleep 5; done
+                        argocd app wait ${ARGOCD_APP_NAME} --operation in-progress
                         argocd app sync ${ARGOCD_APP_NAME} --prune
                         '''
                     }
@@ -150,25 +149,5 @@ pipeline {
         failure {
             echo 'The build or deployment failed.'
         }
-        /* 
-        always {
-            script {
-                withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-                    sh 'git config --global user.email "gurwns4643@gmail.com"'
-                    sh 'git config --global user.name "K-hyeokjun"'
-                    sh 'git pull origin ${BRANCH_NAME}'
-
-                    def changes = sh(script: 'git status --porcelain', returnStdout: true).trim()
-                    if (changes) {
-                        sh 'git add k8s/petclinic-deployment.yaml'
-                        sh "git commit -m 'Update deployment to version ${env.NEW_VERSION}'"
-                        sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/K-hyeokjun/spring-petclinic-docker.git ${BRANCH_NAME}"
-                    } else {
-                        echo "No changes to commit"
-                    }
-                }
-            }
-        }
-        */
     }
 }
