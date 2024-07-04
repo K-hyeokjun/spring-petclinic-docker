@@ -6,8 +6,9 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
+  ingressClassName: nginx # 추가된 부분
   rules:
-  - host: www.hyeokjun.com  # Route 53에 설정한 도메인 이름
+  - host: www.hyeokjun.com
     http:
       paths:
       - path: /
