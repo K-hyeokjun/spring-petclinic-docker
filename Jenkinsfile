@@ -99,6 +99,16 @@ pipeline {
 
     post {
         always {
+            cleanWs()
+        }
+        success {
+            echo 'The build and deployment were successful!'
+        }
+        failure {
+            echo 'The build or deployment failed.'
+        }
+        /*
+        always {
             script {
                 withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
                     sh 'git config --global user.email "gurwns4643@gmail.com"'
@@ -116,5 +126,6 @@ pipeline {
                 }
             }
         }
+        */
     }
 }
