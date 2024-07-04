@@ -1,46 +1,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose convert -f docker-compose-k8s.yml
-    kompose.version: 1.31.2 (HEAD)
-  creationTimestamp: null
+  name: spring-petclinic
   labels:
-    io.kompose.service: petclinic
-  name: petclinic
+    app: spring-petclinic
 spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: petclinic
-  strategy:
-    type: Recreate
+      app: spring-petclinic
   template:
     metadata:
-      annotations:
-        kompose.cmd: kompose convert -f docker-compose-k8s.yml
-        kompose.version: 1.31.2 (HEAD)
-      creationTimestamp: null
       labels:
-        io.kompose.network/spring-petclinic-docker-default: "true"
-        io.kompose.service: petclinic
+        app: spring-petclinic
     spec:
       containers:
-        - env:
-            - name: MYSQL_URL
-              value: jdbc:mysql://mysqlserver/petclinic
-            - name: SERVER_PORT
-              value: "8080"
-          image: kwonhyeokjun/spring-petclinic:latest
-          imagePullPolicy: IfNotPresent
-          name: petclinic
-          ports:
-            - containerPort: 8000
-              hostPort: 8000
-              protocol: TCP
-            - containerPort: 8080
-              hostPort: 8080
-              protocol: TCP
-          resources: {}
+      - name: spring-petclinic
+        image: kwonhyeokjun/myjenkins-blueocean:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: MYSQL_URL
+          value: jdbc:mysql://mysqlserver/petclinic
+        - name: SERVER_PORT
+          value: "8080"
+        ports:
+        - containerPort: 8080
+          protocol: TCP
       restartPolicy: Always
-status: {}
