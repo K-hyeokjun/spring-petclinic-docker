@@ -30,6 +30,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: petclinic
+                name: spring-petclinic
                 port:
                   number: 8000
