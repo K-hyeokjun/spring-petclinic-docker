@@ -14,7 +14,7 @@ metadata:
     alb.ingress.kubernetes.io/ssl-redirect: '443'
     alb.ingress.kubernetes.io/healthcheck-path: '/health'
   labels:
-    io.kompose.service: petclinic
+    io.kompose.service: spring-petclinic
 spec:
   rules:
     - http:
@@ -23,13 +23,13 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: petclinic
+                name: spring-petclinic
                 port:
                   number: 8080
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: petclinic
+                name: spring-petclinic
                 port:
                   number: 8000
