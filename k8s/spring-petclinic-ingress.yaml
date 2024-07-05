@@ -26,10 +26,3 @@ spec:
                 name: spring-petclinic
                 port:
                   number: 8080
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: spring-petclinic
-                port:
-                  number: 8000
